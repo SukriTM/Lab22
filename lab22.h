@@ -1,6 +1,6 @@
 #include<iostream>
 #include<string>
-#include<ctime>
+#include<ctime> 
 #include<cstdlib>
 #include<vector>
 #include<iomanip>
@@ -19,7 +19,7 @@ class Equipment{
 class Unit{
 		string name;
 		string type;		
-		int hp;
+		int hp; 
 		int hpmax;
 		int atk;
 		int def;
@@ -40,6 +40,45 @@ class Unit{
 		void equip(Equipment *);  
 };
 
+Equipment::Equipment(int a, int b, int c){
+	hpmax = a; atk = b; def = c;
+}
+
+vector<int> Equipment::getStat(){
+	vector<int> v;
+	v.push_back(hpmax);
+	v.push_back(atk);
+	v.push_back(def);   
+	return v;  
+}
+
+void Unit::equip(Equipment *p){ 
+	vector<int> stat = p->getStat();
+	int d1,d2,d3;
+	if (equipment == NULL)
+	{
+		p->getStat();
+		hpmax += stat[0];
+		atk += stat[1]; 
+		def += stat[2];
+		equipment = p;
+	}else{
+		stat = equipment->getStat();
+		d1 = hpmax - stat[0];
+		d2 = atk - stat[1];
+		d3 = def - stat[2];
+		equipment = p;
+		stat = p->getStat();
+		hpmax = d1 + stat[0];
+		atk = d2 + stat[1]; 
+		def = d3 + stat[2];
+		if (hpmax > hp) hp = hp;
+		else if(hpmax < hp) hp =hpmax;
+		equipment = p;
+	}
+}
+
+
 Unit::Unit(string t,string n){ 
 	type = t;
 	name = n;
@@ -54,6 +93,7 @@ Unit::Unit(string t,string n){
 	}
 	hp = hpmax;	
 	guard_on = false;
+	dodge_on = false;
 	equipment = NULL;
 }
 
@@ -73,7 +113,8 @@ void Unit::showStatus(){
 }
 
 void Unit::newTurn(){
-	guard_on = false; 
+	guard_on = false;
+	dodge_on = false; 
 }
 
 int Unit::beAttacked(int oppatk){
@@ -81,6 +122,10 @@ int Unit::beAttacked(int oppatk){
 	if(oppatk > def){
 		dmg = oppatk-def;	
 		if(guard_on) dmg = dmg/3;
+		if(dodge_on){
+			if (rand()%2+1 == 1) dmg = 0;
+			else dmg = 2*dmg;
+		}
 	}	
 	hp -= dmg;
 	if(hp <= 0){hp = 0;}
@@ -90,6 +135,10 @@ int Unit::beAttacked(int oppatk){
 
 int Unit::attack(Unit &opp){
 	return opp.beAttacked(atk);
+}
+
+int Unit::ultimateAttack(Unit &opp){
+	return opp.beAttacked(atk*2);
 }
 
 int Unit::heal(){
@@ -102,6 +151,10 @@ int Unit::heal(){
 void Unit::guard(){
 	guard_on = true;
 }	
+
+void Unit::dodge(){
+	dodge_on = true;	
+}
 
 bool Unit::isDead(){
 	if(hp <= 0) return true;
@@ -167,4 +220,3 @@ void playerLose(){
 	cout << "*                                                     *\n";
 	cout << "*******************************************************\n";
 };
-
